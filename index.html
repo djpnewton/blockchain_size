@@ -8,19 +8,22 @@ xmlhttp.onreadystatechange = function() {
     if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
         var bcJson = JSON.parse(xmlhttp.responseText);
         chart(bcJson);
+        stats(bcJson);
     }
 };
 xmlhttp.open("GET", url, true);
 xmlhttp.send();
 
+var MB = 1000 * 1000;
+
 function chart(bcJson) {
-    var arr = [['date', 'bitcoin', 'ethereum']];
+    var arr = [['date', 'bitcoin (~/.bitcoin, txindex=1)', 'ethereum (~/.ethereum)']];
     for (var i = 0; i < bcJson.length; i++) {
         var item = bcJson[i];
         var values = item.values;
         if (values.length == 2)
         {
-            var dp = [item.date, values[0][1], values[1][1]];
+            var dp = [new Date(item.date * 1000), values[0][1]/MB, values[1][1]/MB];
             arr.push(dp);
         }
     }
@@ -32,7 +35,7 @@ function chart(bcJson) {
         var data = google.visualization.arrayToDataTable(arr);
 
         var options = {
-            title: 'blocksize',
+            title: 'datadir size (MB)',
             curveType: 'function',
             legend: { position: 'bottom' }
         };
@@ -42,10 +45,43 @@ function chart(bcJson) {
         chart.draw(data, options);
     }
 }
+
+function stats(bcJson) {
+    var start = bcJson[0];
+    var end = bcJson[bcJson.length-1];
+    var btc_start = start.values[0][1];
+    var btc_end = end.values[0][1];
+    var eth_start = start.values[1][1];
+    var eth_end = end.values[1][1];
+    var btc_pc = (btc_end-btc_start)/btc_start * 100;
+    var btc_mb = (btc_end-btc_start)/MB;
+    var eth_pc = (eth_end-eth_start)/eth_start * 100;
+    var eth_mb = (eth_end-eth_start)/MB;
+    document.getElementById('btc_percent_change').textContent = btc_pc;
+    document.getElementById('btc_mb_change').textContent = btc_mb;
+    document.getElementById('eth_percent_change').textContent = eth_pc;
+    document.getElementById('eth_mb_change').textContent = eth_mb;
+}
     </script>
   </head>
   <body>
     <div id="curve_chart" style="width: 900px; height: 500px"></div>
+    <div id="stats">
+        <ul>
+            <li>bitcoin
+                <ul>
+                    <li>% change: <span id="btc_percent_change">-</span></li>
+                    <li>Mb change: <span id="btc_mb_change">-</span></li>
+                </ul>
+            </li>
+            <li>ethereum
+                <ul>
+                    <li>% change: <span id="eth_percent_change">-</span></li>
+                    <li>MB change: <span id="eth_mb_change">-</span></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
   </body>
 </html>
 

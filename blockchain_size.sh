@@ -2,6 +2,8 @@
 
 set -e
 
+cd "$(dirname "$0")"
+
 ./blockchain_size.py
 ./blockchain_size_format.py
 

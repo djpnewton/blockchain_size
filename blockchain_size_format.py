@@ -19,7 +19,7 @@ with open(logfile, 'r') as fin:
 		name = parts[1].strip()
 		size = int(parts[2])
 		l = len(data)-1
-		if l > 0 and data[l]['date'] == date:
+		if l >= 0 and data[l]['date'] == date:
 			data[l]['values'].append((name, size))
 		else:
 			d = datapoint(date, [(name, size)])
