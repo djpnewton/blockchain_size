@@ -3,6 +3,7 @@
 import os
 import subprocess
 import time
+import sys
 
 blockchains = [('bitcoin', '/home/daniel/.bitcoin', 'bitcoind'), ('ethereum', '/home/daniel/.ethereum', 'geth')]
 logfile = 'blockchain_size_log.txt'
@@ -24,7 +25,9 @@ def cpu_percent(process_name):
 	return output.strip()
 
 timestamp = time.time()
-f = open(logfile, 'a')
+f = None
+if len(sys.argv) > 0 and sys.argv[0] == 'skiplog':
+    f = open(logfile, 'a')
 
 for bc in blockchains:
 	name = bc[0]
@@ -34,5 +37,6 @@ for bc in blockchains:
         cpu = cpu_percent(process_name)
 	entry = '%f, %s, %d, %s' % (timestamp, name, size, cpu)
 	print entry
-	f.write(entry)
-	f.write('\n')
+        if f:
+            f.write(entry)
+            f.write('\n')
