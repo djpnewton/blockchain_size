@@ -9,6 +9,7 @@ xmlhttp.onreadystatechange = function() {
     if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
         var bcJson = JSON.parse(xmlhttp.responseText);
         stripOutOfRangeDates(bcJson);
+        setMaxPoints(bcJson);
         chart(bcJson);
         stats(bcJson);
     }
@@ -17,6 +18,7 @@ xmlhttp.open("GET", url, true);
 xmlhttp.send();
 
 var MB = 1000 * 1000;
+var maxPoints = 250;
 
 function stripOutOfRangeDates(bcJson) {
     var qs = URI(document.URL).query(true);
@@ -30,6 +32,18 @@ function stripOutOfRangeDates(bcJson) {
         var date = parseInt(bcJson[i].date);
         if (date < start || date > end) {
             bcJson.splice(i, 1);
+        }
+    }
+}
+
+function setMaxPoints(bcJson) {
+    var len = bcJson.length;
+    if (len > maxPoints) {
+        var keepIfMultipleOf = Math.round(len / maxPoints);
+        for (var i = len-1; i >= 0; i--) {
+            if (i % keepIfMultipleOf != 0) {
+                bcJson.splice(i, 1);
+            }
         }
     }
 }
