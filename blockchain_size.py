@@ -26,7 +26,7 @@ def cpu_percent(process_name):
 
 timestamp = time.time()
 f = None
-if len(sys.argv) > 0 and sys.argv[0] == 'skiplog':
+if len(sys.argv) > 1 and sys.argv[1] == 'log':
     f = open(logfile, 'a')
 
 for bc in blockchains:
@@ -38,5 +38,6 @@ for bc in blockchains:
 	entry = '%f, %s, %d, %s' % (timestamp, name, size, cpu)
 	print entry
         if f:
+            print 'adding to log..'
             f.write(entry)
             f.write('\n')
