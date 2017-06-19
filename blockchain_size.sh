@@ -9,3 +9,5 @@ cd "$(dirname "$0")"
 
 cp blockchain_size*.txt /var/www/html/bc/
 cp index.html /var/www/html/bc/
+
+./upload.sh

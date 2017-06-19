@@ -17,12 +17,12 @@ def dir_size(start_path):
 	return total_size
 
 def cpu_percent(process_name):
-	#output = subprocess.check_output('ps -C %s -o %%cpu' % process_name, shell=True)
-	#return output.split()[1]
+	output = subprocess.check_output('ps -C %s -o %%cpu' % process_name, shell=True)
+	return output.split()[1]
 
-	cmd = "/usr/bin/top -p $(/usr/bin/pgrep %s) -n1 | /usr/bin/tail -n3 | /usr/bin/awk '{ print $10 }'" % process_name
-	output = subprocess.check_output(cmd, shell=True)
-	return output.strip()
+	#cmd = "/usr/bin/top -p $(/usr/bin/pgrep %s) -n1 | /usr/bin/tail -n3 | /usr/bin/awk '{ print $10 }'" % process_name
+	#output = subprocess.check_output(cmd, shell=True)
+	#return output.strip()
 
 timestamp = time.time()
 f = None

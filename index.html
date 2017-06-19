@@ -10,8 +10,9 @@ xmlhttp.onreadystatechange = function() {
         var bcJson = JSON.parse(xmlhttp.responseText);
         stripOutOfRangeDates(bcJson);
         setMaxPoints(bcJson);
-        chart(bcJson);
-        stats(bcJson);
+        datadir_chart(bcJson);
+        datadir_stats(bcJson);
+        cpu_chart(bcJson);
     }
 };
 xmlhttp.open("GET", url, true);
@@ -41,14 +42,14 @@ function setMaxPoints(bcJson) {
     if (len > maxPoints) {
         var keepIfMultipleOf = Math.round(len / maxPoints);
         for (var i = len-1; i >= 0; i--) {
-            if (i % keepIfMultipleOf != 0) {
+            if (i % keepIfMultipleOf != 0 && i != len-1) {
                 bcJson.splice(i, 1);
             }
         }
     }
 }
 
-function chart(bcJson) {
+function datadir_chart(bcJson) {
     var arr = [['date', 'bitcoin (~/.bitcoin, txindex=1)', 'ethereum (~/.ethereum)']];
     for (var i = 0; i < bcJson.length; i++) {
         var item = bcJson[i];
@@ -72,13 +73,13 @@ function chart(bcJson) {
             legend: { position: 'bottom' }
         };
 
-        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+        var chart = new google.visualization.LineChart(document.getElementById('datadir_chart'));
 
         chart.draw(data, options);
     }
 }
 
-function stats(bcJson) {
+function datadir_stats(bcJson) {
     var start = bcJson[0];
     var end = bcJson[bcJson.length-1];
     var btc_start = start.values[0][1];
@@ -89,31 +90,65 @@ function stats(bcJson) {
     var btc_mb = (btc_end-btc_start)/MB;
     var eth_pc = (eth_end-eth_start)/eth_start * 100;
     var eth_mb = (eth_end-eth_start)/MB;
-    document.getElementById('btc_percent_change').textContent = btc_pc;
-    document.getElementById('btc_mb_change').textContent = btc_mb;
-    document.getElementById('eth_percent_change').textContent = eth_pc;
-    document.getElementById('eth_mb_change').textContent = eth_mb;
+    document.getElementById('datadir_btc_percent_change').textContent = btc_pc;
+    document.getElementById('datadir_btc_mb_change').textContent = btc_mb;
+    document.getElementById('datadir_eth_percent_change').textContent = eth_pc;
+    document.getElementById('datadir_eth_mb_change').textContent = eth_mb;
 }
+
+function cpu_chart(bcJson) {
+    var arr = [['date', 'bitcoind', 'geth']];
+    for (var i = 0; i < bcJson.length; i++) {
+        var item = bcJson[i];
+        var values = item.values;
+        if (values.length == 2)
+        {
+            if (values[0][2] === null || values[1][2] === null)
+                continue;
+            var dp = [new Date(item.date * 1000), values[0][2], values[1][2]];
+            arr.push(dp);
+        }
+    }
+
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+        var data = google.visualization.arrayToDataTable(arr);
+
+        var options = {
+            title: 'cpu usage',
+            curveType: 'function',
+            legend: { position: 'bottom' }
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('cpu_chart'));
+
+        chart.draw(data, options);
+    }
+}
+
     </script>
   </head>
   <body>
-    <div id="curve_chart" style="width: 900px; height: 500px"></div>
-    <div id="stats">
+    <div id="datadir_chart" style="width: 900px; height: 500px"></div>
+    <div id="datadir_stats">
         <ul>
             <li>bitcoin
                 <ul>
-                    <li>% change: <span id="btc_percent_change">-</span></li>
-                    <li>Mb change: <span id="btc_mb_change">-</span></li>
+                    <li>% change: <span id="datadir_btc_percent_change">-</span></li>
+                    <li>Mb change: <span id="datadir_btc_mb_change">-</span></li>
                 </ul>
             </li>
             <li>ethereum
                 <ul>
-                    <li>% change: <span id="eth_percent_change">-</span></li>
-                    <li>MB change: <span id="eth_mb_change">-</span></li>
+                    <li>% change: <span id="datadir_eth_percent_change">-</span></li>
+                    <li>MB change: <span id="datadir_eth_mb_change">-</span></li>
                 </ul>
             </li>
         </ul>
     </div>
+    <div id="cpu_chart" style="width: 900px; height: 500px; display: none"></div>
   </body>
 </html>
 
