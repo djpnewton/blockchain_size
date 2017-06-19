@@ -97,15 +97,22 @@ function datadir_stats(bcJson) {
 }
 
 function cpu_chart(bcJson) {
+    var bitcoind_cpu_avg = 0;
+    var geth_cpu_avg = 0;
+    var running_avg_count = 10;
     var arr = [['date', 'bitcoind', 'geth']];
     for (var i = 0; i < bcJson.length; i++) {
         var item = bcJson[i];
         var values = item.values;
-        if (values.length == 2)
+        if (values.length == 2 && item.date >= 1491004800)
         {
             if (values[0][2] === null || values[1][2] === null)
                 continue;
-            var dp = [new Date(item.date * 1000), values[0][2], values[1][2]];
+            bitcoind_cpu_avg = bitcoind_cpu_avg - bitcoind_cpu_avg / running_avg_count;
+            bitcoind_cpu_avg = bitcoind_cpu_avg + values[0][2] / running_avg_count;
+            geth_cpu_avg = geth_cpu_avg - geth_cpu_avg / running_avg_count;
+            geth_cpu_avg = geth_cpu_avg + values[1][2] / running_avg_count;
+            var dp = [new Date(item.date * 1000), bitcoind_cpu_avg, geth_cpu_avg];
             arr.push(dp);
         }
     }
@@ -117,7 +124,7 @@ function cpu_chart(bcJson) {
         var data = google.visualization.arrayToDataTable(arr);
 
         var options = {
-            title: 'cpu usage',
+            title: 'cpu usage (approx running average n=10)',
             curveType: 'function',
             legend: { position: 'bottom' }
         };
@@ -148,7 +155,7 @@ function cpu_chart(bcJson) {
             </li>
         </ul>
     </div>
-    <div id="cpu_chart" style="width: 900px; height: 500px; display: none"></div>
+    <div id="cpu_chart" style="width: 900px; height: 500px"></div>
   </body>
 </html>
 
